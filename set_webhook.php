@@ -1,7 +1,12 @@
 <?php
 $token = "8749239208:AAFyJIvjIhGT9VpEW65nDtyLjSAwXa2YHao";
-$webhook_url = "https://8ce3-2001-448a-40a0-177c-c1da-345f-7de8-7a64.ngrok-free.app/infosekolah/webhook.php";
+$domain_railway = "https://chatbot-production-36c8.up.railway.app";
+$webhook_url = $domain_railway . "/webhook.php";
 
-$response = file_get_contents("https://api.telegram.org/bot$token/setWebhook?url=$webhook_url");
-echo $response;
+$api_url = "https://api.telegram.org/bot$token/setWebhook?url=$webhook_url";
+$response = file_get_contents($api_url);
+
+echo "<h1>Setting Webhook Chatbot</h1>";
+echo "Target URL: " . $webhook_url . "<br>";
+echo "Response dari Telegram: " . $response;
 ?>
