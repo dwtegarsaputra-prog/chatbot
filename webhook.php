@@ -1,6 +1,11 @@
 <?php
 require 'config.php';
 
+// Pastikan konstanta ini ada untuk mengirim pesan
+if (!defined('TELEGRAM_API')) {
+    define('TELEGRAM_API', 'https://api.telegram.org/bot8749239208:AAFyJIvjIhGT9VpEW65nDtyLjSAwXa2YHao/');
+}
+
 /**
  * Fungsi untuk mengirim pesan ke Telegram
  */
@@ -37,7 +42,7 @@ if (isset($update['callback_query'])) {
 }
 
 /**
- * Struktur Menu Utama yang sesuai dengan kategori di database
+ * Struktur Menu Utama
  */
 $menuUtama = json_encode([
     'inline_keyboard' => [
@@ -48,30 +53,32 @@ $menuUtama = json_encode([
     ]
 ]);
 
-// --- PERUBAHAN LOGIKA RESPON ---
-
-// 1. Jika mengetik /start, hanya memberikan balasan teks saja
+// 1. Respon /start
 if ($text === '/start') {
-    $pesanStart = "<b>Selamat Datang di Chatbot SMKN 1 Kutasari</b>\n\nKetik <b>menu</b> untuk menampilkan pilihan informasi atau ketik langsung apa yang ingin Anda cari (Contoh: 'tkj' atau 'jadwal').";
+    $pesanStart = "<b>Selamat Datang di Chatbot SMKN 1 Kutasari</b>\n\nKetik <b>menu</b> untuk menampilkan pilihan informasi.";
     sendMessageTelegram($chat_id, $pesanStart);
     exit;
 }
 
-// 2. Jika mengetik menu atau menekan tombol Menu Utama, muncul teks dengan tombol menu
+// 2. Respon menu
 if ($text === 'menu') {
     $pesanMenu = "Silakan pilih kategori informasi di bawah ini:";
     sendMessageTelegram($chat_id, $pesanMenu, $menuUtama);
     exit;
 }
 
+// --- PERBAIKAN KONEKSI DATABASE ---
 try {
-    $pdo = new PDO('mysql:host='.DB_HOST.';dbname='.DB_NAME, DB_USER, DB_PASS);
+    // Menggunakan variabel dari config.php
+    $pdo = new PDO("mysql:host=$host;dbname=$db;port=$port", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) { 
+    // Kirim pesan error ke Telegram jika gagal konek
+    sendMessageTelegram($chat_id, "Gagal koneksi database: " . $e->getMessage());
     exit; 
 }
 
-// --- LOGIKA PENCARIAN FLEKSIBEL (Tanpa Mengubah Database) ---
+// --- LOGIKA PENCARIAN ---
 $query = "SELECT * FROM informasi_sekolah WHERE kategori LIKE :kw OR judul LIKE :kw";
 $stmt = $pdo->prepare($query);
 $stmt->execute(['kw' => "%$text%"]);
@@ -84,7 +91,7 @@ if ($rows) {
         foreach ($rows as $r) {
             $buttons['inline_keyboard'][] = [['text' => "📍 " . $r['judul'], 'callback_data' => $r['judul']]];
         }
-        $buttons['inline_keyboard'][] = [['text' => '🏠 Kembali ke Menu Utama', 'callback_data' => 'menu']];
+        $buttons['inline_keyboard'][] = [['text' => '🏠 Kembali ke Menu', 'callback_data' => 'menu']];
         sendMessageTelegram($chat_id, $jawaban, json_encode($buttons));
     } else {
         $row = $rows[0];
@@ -94,5 +101,6 @@ if ($rows) {
         sendMessageTelegram($chat_id, $jawaban, $btnBack);
     }
 } else {
-    sendMessageTelegram($chat_id, "Maaf, informasi tentang <b>'$text'</b> tidak ditemukan. Ketik <b>menu</b> untuk melihat bantuan.", null);
+    sendMessageTelegram($chat_id, "Maaf, informasi <b>'$text'</b> tidak ditemukan. Ketik <b>menu</b> untuk bantuan.");
 }
+?>
