@@ -69,13 +69,14 @@ if ($text === 'menu') {
 
 // --- PERBAIKAN KONEKSI DATABASE ---
 try {
-    // Menggunakan variabel dari config.php
+    // Memakai variabel dari config.php
     $pdo = new PDO("mysql:host=$host;dbname=$db;port=$port", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) { 
-    // Kirim pesan error ke Telegram jika gagal konek
-    sendMessageTelegram($chat_id, "Gagal koneksi database: " . $e->getMessage());
+    // Supaya kita tahu kalau error, bot akan chat kita
+    sendMessageTelegram($chat_id, "Error Koneksi: " . $e->getMessage());
     exit; 
+} 
 }
 
 // --- LOGIKA PENCARIAN ---
