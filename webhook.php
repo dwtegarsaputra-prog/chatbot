@@ -69,13 +69,14 @@ if ($text === 'menu') {
 
 // --- PERBAIKAN KONEKSI DATABASE ---
 try {
-    // Tambahkan variabel $port atau konstanta DB_PORT di sini
+    // Tambahkan variabel port ke dalam koneksi
     $pdo = new PDO("mysql:host=$host;dbname=$db;port=$port", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) { 
-    // Jika error, bot akan mengirim pesan ke kita
+    // Kirim pesan error ke bot agar kamu tahu masalahnya
     sendMessageTelegram($chat_id, "Database Error: " . $e->getMessage());
     exit; 
+}
 }
 } 
 }
