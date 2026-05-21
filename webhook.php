@@ -69,13 +69,14 @@ if ($text === 'menu') {
 
 // --- PERBAIKAN KONEKSI DATABASE ---
 try {
-    // Memakai variabel dari config.php
+    // Tambahkan variabel $port atau konstanta DB_PORT di sini
     $pdo = new PDO("mysql:host=$host;dbname=$db;port=$port", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) { 
-    // Supaya kita tahu kalau error, bot akan chat kita
-    sendMessageTelegram($chat_id, "Error Koneksi: " . $e->getMessage());
+    // Jika error, bot akan mengirim pesan ke kita
+    sendMessageTelegram($chat_id, "Database Error: " . $e->getMessage());
     exit; 
+}
 } 
 }
 
